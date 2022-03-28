@@ -41,6 +41,8 @@ private:
         Product,
         Comp,
         Del,
+        Read,
+        Resize,
         Help,
         Exit,
     };
@@ -58,6 +60,7 @@ private:
     const ActionMap m_actions;
     OperationList m_operations;
     bool m_running = true;
+    int m_maxCommands;
     std::istream& m_istr;
     std::ostream& m_ostr;
 
@@ -67,4 +70,6 @@ private:
 
     static ActionMap createActions();
     static OperationList createOperations();
+
+    void getArguments(std::istream& inp, int& n1, int& n2, int args);
 };

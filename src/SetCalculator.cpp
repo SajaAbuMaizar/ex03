@@ -12,11 +12,47 @@
 #include <sstream>
 #include <algorithm>
 
+#include <iostream>
+
 namespace rng = std::ranges;
 
 SetCalculator::SetCalculator(std::istream& istr, std::ostream& ostr)
     : m_actions(createActions()), m_operations(createOperations()), m_istr(istr), m_ostr(ostr)
 {
+    while (1)
+    {
+        try {
+            int temp;
+            m_ostr << "please enter maximum number of functions\n";
+            getArguments(std::cin, temp, temp, 1);
+            if (temp < 3 || temp > 100)
+                throw std::invalid_argument("received incorrect value\n");
+            m_maxCommands = temp;
+            break;
+        }
+        catch (std::istream::failure e)
+        {
+            m_ostr << "Bad input\n";
+        }
+        catch (std::invalid_argument e)
+        {
+            m_ostr << "Argument must be in the range 3 - 100\n";
+        }
+    }
+}
+
+//asks to anter arguments
+void SetCalculator::getArguments(std::istream& input, int& arg1, int& arg2, int num_of_args)
+{
+    std::string line;
+    std::getline(input, line);
+    std::stringstream ss(line);
+    ss.exceptions(ss.failbit | ss.badbit);
+
+    if (num_of_args == 1)
+        ss >> arg1;
+    else
+        ss >> arg1 >> arg2;
 }
 
 void SetCalculator::run()
@@ -24,12 +60,15 @@ void SetCalculator::run()
     do
     {
         m_ostr << '\n';
+        m_ostr << "Number of maximum commands: " << m_maxCommands << '\n';
+        m_ostr << "Number of available commands: " << m_maxCommands - m_operations.size() << '\n';
         printOperations();
         m_ostr << "Enter command ('help' for the list of available commands): ";
         const auto action = readAction();
         runAction(action);
     } while (m_running);
 }
+
 
 void SetCalculator::eval()
 {
