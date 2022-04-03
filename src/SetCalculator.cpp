@@ -44,7 +44,6 @@ SetCalculator::SetCalculator(std::istream& istr, std::ostream& ostr)
 //asks to anter arguments
 void SetCalculator::getArguments(std::istream& input, int& arg1, int& arg2, int num_of_args)
 {
-    std::cout << "inside args\n";
     std::string line;
     std::getline(input, line);
     std::stringstream ss(line);
