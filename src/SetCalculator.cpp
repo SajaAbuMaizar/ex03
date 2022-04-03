@@ -16,16 +16,18 @@
 
 namespace rng = std::ranges;
 
+
+
 SetCalculator::SetCalculator(std::istream& istr, std::ostream& ostr)
     : m_actions(createActions()), m_operations(createOperations()), m_istr(istr), m_ostr(ostr)
 {
-    while (1)
+    while (true)
     {
         try {
             int temp;
             m_ostr << "please enter maximum number of functions\n";
-            getArguments(std::cin, temp, temp, 1);
-            if (temp < 3 || temp > 100)
+            getArguments(std::cin, temp, temp, SINGLE_ARG);
+            if (temp < MIN_COMMANDS || temp > MAX_COMMANDS)
                 throw std::invalid_argument("received incorrect value\n");
             m_maxCommands = temp;
             break;
@@ -49,7 +51,7 @@ void SetCalculator::getArguments(std::istream& input, int& arg1, int& arg2, int 
     std::stringstream ss(line);
     ss.exceptions(ss.failbit | ss.badbit);
 
-    if (num_of_args == 1)
+    if (num_of_args == SINGLE_ARG)
         ss >> arg1;
     else
         ss >> arg1 >> arg2;
@@ -110,6 +112,8 @@ void SetCalculator::eval()
 
 void SetCalculator::del()
 {
+    if (m_operations.size() == MIN_COMMANDS)
+        throw std::out_of_range("Reached the minimum number of operations\n");
     if (auto i = readOperationIndex(); i)
     {
         m_operations.erase(m_operations.begin() + *i);

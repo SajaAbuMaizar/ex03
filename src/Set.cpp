@@ -4,12 +4,13 @@
 #include <iostream>
 
 namespace rng = std::ranges;
+const int MIN_SIZE = 1;
 
 Set::Set(std::istream& istr)
 {
     auto n = 0;
     istr >> n;
-    if (n < 1)
+    if (n < MIN_SIZE)
         throw std::out_of_range("Invalid Size Of Set\n");
     for (auto i = 0; i < n; ++i)
     {

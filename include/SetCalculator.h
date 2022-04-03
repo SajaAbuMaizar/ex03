@@ -7,6 +7,11 @@
 #include <optional>
 #include <iostream>
 
+const int SINGLE_ARG = 1;
+const int BINARY_ARG = 2;
+const int MIN_COMMANDS = 3;
+const int MAX_COMMANDS = 100;
+
 class Operation;
 
 class SetCalculator
@@ -24,6 +29,8 @@ private:
     template <typename FuncType>
     void binaryFunc()
     {
+        if (m_operations.size() == m_maxCommands)
+            throw std::out_of_range("Reached the maximum number of operations\n");
         if (auto f0 = readOperationIndex(), f1 = readOperationIndex(); f0 && f1)
         {
             m_operations.push_back(std::make_shared<FuncType>(m_operations[*f0], m_operations[*f1]));
