@@ -5,6 +5,7 @@
 #include <string>
 #include <iosfwd>
 #include <optional>
+#include <iostream>
 
 class Operation;
 
@@ -64,7 +65,7 @@ private:
     std::istream& m_istr;
     std::ostream& m_ostr;
 
-    std::optional<int> readOperationIndex() const;
+    std::optional<int> readOperationIndex();
     Action readAction() const;
     void runAction(Action action);
 

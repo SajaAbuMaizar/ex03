@@ -11,7 +11,7 @@
 #include <ostream>
 #include <sstream>
 #include <algorithm>
-
+#include <limits>
 #include <iostream>
 
 namespace rng = std::ranges;
@@ -44,6 +44,7 @@ SetCalculator::SetCalculator(std::istream& istr, std::ostream& ostr)
 //asks to anter arguments
 void SetCalculator::getArguments(std::istream& input, int& arg1, int& arg2, int num_of_args)
 {
+    std::cout << "inside args\n";
     std::string line;
     std::getline(input, line);
     std::stringstream ss(line);
@@ -59,13 +60,35 @@ void SetCalculator::run()
 {
     do
     {
-        m_ostr << '\n';
-        m_ostr << "Number of maximum commands: " << m_maxCommands << '\n';
-        m_ostr << "Number of available commands: " << m_maxCommands - m_operations.size() << '\n';
-        printOperations();
-        m_ostr << "Enter command ('help' for the list of available commands): ";
-        const auto action = readAction();
-        runAction(action);
+        m_istr.clear(); //to clear the buffer
+        m_istr.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        try
+        {
+            m_ostr << '\n';
+            m_ostr << "Number of maximum commands: " << m_maxCommands << '\n';
+            m_ostr << "Number of available commands: " << m_maxCommands - m_operations.size() << '\n';
+            printOperations();
+            m_ostr << "Enter command ('help' for the list of available commands): ";
+            const auto action = readAction();
+            runAction(action);
+        }
+        catch (std::invalid_argument e)
+        {
+            m_ostr << e.what();
+        }
+        catch (std::out_of_range e)
+        {
+            m_ostr << e.what();
+        }
+        catch (std::istream::failure e)
+        {
+            m_ostr << e.what();
+        }
+       /* catch (InvalidPath e)//if the file is invalid
+        {
+            std::cerr << e.what() << "please try again\n";
+        }*/
+
     } while (m_running);
 }
 
@@ -123,11 +146,25 @@ void SetCalculator::printOperations() const
     m_ostr << '\n';
 }
 
-std::optional<int> SetCalculator::readOperationIndex() const
+std::optional<int> SetCalculator::readOperationIndex()
 {
-    auto i = 0;
-    m_istr >> i;
-    if (i >= m_operations.size())
+    int i = 0;
+    try
+    {
+        m_istr >> i;
+        if (bool failed = m_istr.fail())
+        {
+            throw std::istream::failure("");
+        }
+        if (i >= m_operations.size())
+            throw (std::out_of_range(""));
+    }
+    catch (std::istream::failure e)
+    {
+        m_ostr << "Bad Operation Input\n";
+        return {};
+    }
+    catch (std::out_of_range e)
     {
         m_ostr << "Operation #" << i << " doesn't exist\n";
         return {};
@@ -138,14 +175,14 @@ std::optional<int> SetCalculator::readOperationIndex() const
 SetCalculator::Action SetCalculator::readAction() const
 {
     auto action = std::string();
-    m_istr >> action;
-
-    const auto i = std::ranges::find(m_actions, action, &ActionDetails::command);
-    if (i != m_actions.end())
-    {
-        return i->action;
-    }
-
+	m_istr >> action;
+	const auto i = std::ranges::find(m_actions, action, &ActionDetails::command);
+	if (i != m_actions.end())
+	{
+		return i->action;
+	}
+	else
+		throw std::invalid_argument("received incorrect value\n");
     return Action::Invalid;
 }
 

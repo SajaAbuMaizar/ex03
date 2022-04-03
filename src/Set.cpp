@@ -9,10 +9,14 @@ Set::Set(std::istream& istr)
 {
     auto n = 0;
     istr >> n;
+    if (n < 1)
+        throw std::out_of_range("Invalid Size Of Set\n");
     for (auto i = 0; i < n; ++i)
     {
         auto num = 0;
         istr >> num;
+        if (bool failed = istr.fail()) //if not int
+            throw std::istream::failure("Bad Input\n");
         m_items.push_back(num);
     }
     makeSet();
