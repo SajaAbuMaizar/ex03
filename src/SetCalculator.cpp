@@ -208,6 +208,7 @@ void SetCalculator::runAction(Action action)
         case Action::Product:      binaryFunc<Product>();      break;
         case Action::Comp:         binaryFunc<Comp>();         break;
         case Action::Del:          del();                      break;
+        case Action::Resize:       exit();                     break;///// resize
         case Action::Help:         help();                     break;
         case Action::Exit:         exit();                     break;
     }
