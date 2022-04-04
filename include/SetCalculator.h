@@ -80,4 +80,9 @@ private:
     static OperationList createOperations();
 
     void getArguments(std::istream& inp, int& n1, int& n2, int args);
+    void checkCommandRange();
+    int readNewMax();
+    void Resize();
+    void Read();
+
 };

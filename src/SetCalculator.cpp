@@ -21,26 +21,13 @@ namespace rng = std::ranges;
 SetCalculator::SetCalculator(std::istream& istr, std::ostream& ostr)
     : m_actions(createActions()), m_operations(createOperations()), m_istr(istr), m_ostr(ostr)
 {
-    while (true)
-    {
-        try {
-            int temp;
-            m_ostr << "please enter maximum number of functions\n";
-            getArguments(std::cin, temp, temp, SINGLE_ARG);
-            if (temp < MIN_COMMANDS || temp > MAX_COMMANDS)
-                throw std::invalid_argument("received incorrect value\n");
-            m_maxCommands = temp;
-            break;
-        }
-        catch (std::istream::failure e)
-        {
-            m_ostr << "Bad input\n";
-        }
-        catch (std::invalid_argument e)
-        {
-            m_ostr << "Argument must be in the range 3 - 100\n";
-        }
-    }
+    checkCommandRange();
+}
+
+void SetCalculator::checkCommandRange()
+{
+    m_ostr << "Please enter maximum number of functions:\n";
+    m_maxCommands = readNewMax();
 }
 
 //asks to anter arguments
@@ -208,9 +195,60 @@ void SetCalculator::runAction(Action action)
         case Action::Product:      binaryFunc<Product>();      break;
         case Action::Comp:         binaryFunc<Comp>();         break;
         case Action::Del:          del();                      break;
-        case Action::Resize:       exit();                     break;///// resize
+        case Action::Resize:       Resize();                   break;
+        case Action::Read:         Read();                     break;
         case Action::Help:         help();                     break;
         case Action::Exit:         exit();                     break;
+    }
+}
+
+void SetCalculator::Read()
+{
+    std::string fileName;
+    m_istr >> fileName;
+
+}
+
+void SetCalculator::Resize()
+{
+    int temp = readNewMax();
+
+    if (temp < m_operations.size()) //if the new max is less than the existed commands
+    {
+        int answer;
+        m_ostr << "Do you want to cancel the command or delete the extra commands?\n"
+            << "0 = cancel ,1 = delete extra commands\n";
+        m_istr >> answer;
+        if (answer)
+            m_operations.erase(m_operations.begin() + temp, m_operations.end());
+    }
+    else
+        m_maxCommands = temp;
+}
+
+int SetCalculator::readNewMax()
+{
+    int temp;
+    while(true)
+    {
+        try
+        {
+            m_istr >> temp;
+            if (bool failed = m_istr.fail())
+                throw std::istream::failure("");
+            if (temp < MIN_COMMANDS || temp > MAX_COMMANDS)
+                throw std::invalid_argument("received incorrect value\n");
+            return temp;
+        }
+        catch (std::istream::failure e)
+        {
+            m_ostr << "Bad input\n";
+        }
+        catch (std::invalid_argument e)
+        {
+            m_ostr << "Argument must be in the range 3 - 100\n";
+        }
+        m_ostr << "Enter new max command number:\n";
     }
 }
 
@@ -260,6 +298,16 @@ SetCalculator::ActionMap SetCalculator::createActions()
             "(ete) num - delete operation #num from the operation list",
             Action::Del
         },
+		{
+			"read",
+			"reads the path for a file",
+			Action::Read
+		},
+		{
+			"resize",
+            "resizes the number of the maximum commands that can be entered",
+			Action::Resize
+		},
         {
             "help",
             " - print this command list",
