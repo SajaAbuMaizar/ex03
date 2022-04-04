@@ -19,7 +19,8 @@ namespace rng = std::ranges;
 
 
 SetCalculator::SetCalculator(std::istream& istr, std::ostream& ostr)
-    : m_actions(createActions()), m_operations(createOperations()), m_istr(istr), m_ostr(ostr)
+    : m_actions(createActions()), m_operations(createOperations()), m_istr(istr), m_ostr(ostr),
+      m_readMode(false), m_continueReading(true)
 {
     checkCommandRange();
 }
@@ -27,7 +28,7 @@ SetCalculator::SetCalculator(std::istream& istr, std::ostream& ostr)
 void SetCalculator::checkCommandRange()
 {
     m_ostr << "Please enter maximum number of functions:\n";
-    m_maxCommands = readNewMax();
+    m_maxCommands = readNewMax(m_istr);
 }
 
 //asks to anter arguments
@@ -50,46 +51,58 @@ void SetCalculator::run()
     {
         m_istr.clear(); //to clear the buffer
         m_istr.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-        try
-        {
-            m_ostr << '\n';
-            m_ostr << "Number of maximum commands: " << m_maxCommands << '\n';
-            m_ostr << "Number of available commands: " << m_maxCommands - m_operations.size() << '\n';
-            printOperations();
-            m_ostr << "Enter command ('help' for the list of available commands): ";
-            const auto action = readAction();
-            runAction(action);
-        }
-        catch (std::invalid_argument e)
-        {
-            m_ostr << e.what();
-        }
-        catch (std::out_of_range e)
-        {
-            m_ostr << e.what();
-        }
-        catch (std::istream::failure e)
-        {
-            m_ostr << e.what();
-        }
-        catch (InvalidPath e)//if the file is invalid
-        {
-            std::cerr << e.what() << "please try again\n";
-        }
+        runCommands(m_istr);
 
     } while (m_running);
 }
 
-
-void SetCalculator::eval()
+void SetCalculator::runCommands(std::istream& input)
 {
-    if (auto index = readOperationIndex(); index)
+    try
+    {
+        initialPrint();
+        const auto action = readAction(input);
+        runAction(action, input);
+        return;
+    }
+    catch (std::invalid_argument e)
+    {
+        m_ostr << e.what();
+    }
+    catch (std::out_of_range e)
+    {
+        m_ostr << e.what();
+    }
+    catch (std::istream::failure e)
+    {
+        m_ostr << e.what();
+    }
+    catch (InvalidPath e)//if the file is invalid
+    {
+        std::cerr << e.what() << "please try again\n";
+    }
+    if (m_readMode)
+        throw FileError();
+}
+
+void SetCalculator::initialPrint() const
+{
+    m_ostr << '\n';
+    m_ostr << "Number of maximum commands: " << m_maxCommands << '\n';
+    m_ostr << "Number of available commands: " << m_maxCommands - m_operations.size() << '\n';
+    printOperations();
+    m_ostr << "Enter command ('help' for the list of available commands): ";
+}
+
+void SetCalculator::eval(std::istream& input)
+{
+    if (auto index = readOperationIndex(input); index)
     {
         const auto& operation = m_operations[*index];
         auto inputs = std::vector<Set>();
         for (auto i = 0; i < operation->inputCount(); ++i)
         {
-            inputs.push_back(Set(m_istr));
+            inputs.push_back(Set(input));
         }
 
         operation->print(m_ostr, inputs);
@@ -97,11 +110,11 @@ void SetCalculator::eval()
     }
 }
 
-void SetCalculator::del()
+void SetCalculator::del(std::istream& input)
 {
     if (m_operations.size() == MIN_COMMANDS)
         throw std::out_of_range("Reached the minimum number of operations\n");
-    if (auto i = readOperationIndex(); i)
+    if (auto i = readOperationIndex(input); i)
     {
         m_operations.erase(m_operations.begin() + *i);
     }
@@ -136,13 +149,13 @@ void SetCalculator::printOperations() const
     m_ostr << '\n';
 }
 
-std::optional<int> SetCalculator::readOperationIndex()
+std::optional<int> SetCalculator::readOperationIndex(std::istream& input)
 {
     int i = 0;
     try
     {
-        m_istr >> i;
-        if (bool failed = m_istr.fail())
+        input >> i;
+        if (bool failed = input.fail())
         {
             throw std::istream::failure("");
         }
@@ -159,13 +172,15 @@ std::optional<int> SetCalculator::readOperationIndex()
         m_ostr << "Operation #" << i << " doesn't exist\n";
         return {};
     }
+    if (m_readMode)
+        throw FileError();
     return i;
 }
 
-SetCalculator::Action SetCalculator::readAction() const
+SetCalculator::Action SetCalculator::readAction(std::istream& input) const
 {
     auto action = std::string();
-	m_istr >> action;
+	input >> action;
 	const auto i = std::ranges::find(m_actions, action, &ActionDetails::command);
 	if (i != m_actions.end())
 	{
@@ -176,7 +191,7 @@ SetCalculator::Action SetCalculator::readAction() const
     return Action::Invalid;
 }
 
-void SetCalculator::runAction(Action action)
+void SetCalculator::runAction(Action action, std::istream& input)
 {
     switch (action)
     {
@@ -188,14 +203,14 @@ void SetCalculator::runAction(Action action)
             m_ostr << "Command not found\n";
             break;
 
-        case Action::Eval:         eval();                     break;
-        case Action::Union:        binaryFunc<Union>();        break;
-        case Action::Intersection: binaryFunc<Intersection>(); break;
-        case Action::Difference:   binaryFunc<Difference>();   break;
-        case Action::Product:      binaryFunc<Product>();      break;
-        case Action::Comp:         binaryFunc<Comp>();         break;
-        case Action::Del:          del();                      break;
-        case Action::Resize:       Resize();                   break;
+        case Action::Eval:         eval(input);                     break;
+        case Action::Union:        binaryFunc<Union>(input);   break;
+        case Action::Intersection: binaryFunc<Intersection>(input); break;
+        case Action::Difference:   binaryFunc<Difference>(input);   break;
+        case Action::Product:      binaryFunc<Product>(input);      break;
+        case Action::Comp:         binaryFunc<Comp>(input);         break;
+        case Action::Del:          del(input);                      break;
+        case Action::Resize:       Resize(input);                   break;
         case Action::Read:         Read();                     break;
         case Action::Help:         help();                     break;
         case Action::Exit:         exit();                     break;
@@ -206,29 +221,55 @@ void SetCalculator::Read()
 {
     std::ifstream file;
     openFile(file);
+    m_continueReading = true;
+    m_readMode = true;
+    m_numOfLine = 0;
 
+    while (!file.eof() && m_continueReading)
+    {
+        try
+        {
+            m_numOfLine++;
+            runCommands(file);
+        }
+        catch (FileError e)
+        {
+            m_ostr << e.what() << m_numOfLine;
+            checkToContinue();
+        }
+    }
+    m_readMode = false;
+}
 
+void SetCalculator::checkToContinue()
+{
+    int answer;
+    m_ostr << "\nDo you want to continue reading the file?\n"
+        << "1 = yes, 0 = no\n";
+    m_istr >> answer;
+    if (!answer)
+        m_continueReading = false;
 }
 
 void SetCalculator::openFile(std::ifstream& file)
 {
     std::string fileName;
     m_istr >> fileName;
-    file.open(fileName);
+    file.open(fileName + ".txt");
     if (!file.is_open())
         throw InvalidPath();
 }
 
-void SetCalculator::Resize()
+void SetCalculator::Resize(std::istream& input)
 {
-    int temp = readNewMax();
+    int temp = readNewMax(input);
 
     if (temp < m_operations.size()) //if the new max is less than the existed commands
     {
         int answer;
         m_ostr << "Do you want to cancel the command or delete the extra commands?\n"
             << "0 = cancel ,1 = delete extra commands\n";
-        m_istr >> answer;
+        input >> answer;
         if (answer)
             m_operations.erase(m_operations.begin() + temp, m_operations.end());
     }
@@ -236,15 +277,15 @@ void SetCalculator::Resize()
         m_maxCommands = temp;
 }
 
-int SetCalculator::readNewMax()
+int SetCalculator::readNewMax(std::istream& input)
 {
     int temp;
     while(true)
     {
         try
         {
-            m_istr >> temp;
-            if (bool failed = m_istr.fail())
+            input >> temp;
+            if (bool failed = input.fail())
                 throw std::istream::failure("");
             if (temp < MIN_COMMANDS || temp > MAX_COMMANDS)
                 throw std::invalid_argument("received incorrect value\n");
@@ -253,6 +294,8 @@ int SetCalculator::readNewMax()
         catch (std::istream::failure e)
         {
             m_ostr << "Bad input\n";
+            m_istr.clear(); //to clear the buffer
+            m_istr.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         }
         catch (std::invalid_argument e)
         {

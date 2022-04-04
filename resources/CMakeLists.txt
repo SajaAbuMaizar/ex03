@@ -1,0 +1,1 @@
+configure_file ("commands.txt" ${CMAKE_BINARY_DIR} COPYONLY)

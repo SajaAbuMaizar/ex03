@@ -23,17 +23,17 @@ public:
     void run();
 
 private:
-    void eval();
-    void del();
+    void eval(std::istream& input);
+    void del(std::istream& input);
     void help();
     void exit();
 
     template <typename FuncType>
-    void binaryFunc()
+    void binaryFunc(std::istream& input)
     {
         if (m_operations.size() == m_maxCommands)
             throw std::out_of_range("Reached the maximum number of operations\n");
-        if (auto f0 = readOperationIndex(), f1 = readOperationIndex(); f0 && f1)
+        if (auto f0 = readOperationIndex(input), f1 = readOperationIndex(input); f0 && f1)
         {
             m_operations.push_back(std::make_shared<FuncType>(m_operations[*f0], m_operations[*f1]));
         }
@@ -71,21 +71,28 @@ private:
     OperationList m_operations;
     bool m_running = true;
     int m_maxCommands;
+    int m_numOfLine;
+    bool m_readMode;
+    bool m_continueReading;
+    std::string m_line;
     std::istream& m_istr;
     std::ostream& m_ostr;
 
-    std::optional<int> readOperationIndex();
-    Action readAction() const;
-    void runAction(Action action);
+    std::optional<int> readOperationIndex(std::istream& input);
+    Action readAction(std::istream& input) const;
+    void runAction(Action action, std::istream& input);
 
     static ActionMap createActions();
     static OperationList createOperations();
 
     void getArguments(std::istream& inp, int& n1, int& n2, int args);
+    void runCommands(std::istream& input);
+    void checkToContinue();
+    void initialPrint() const;
     void checkCommandRange();
-    int readNewMax();
+    int readNewMax(std::istream& input);
     void openFile(std::ifstream& file);
-    void Resize();
+    void Resize(std::istream& input);
     void Read();
 
 };
