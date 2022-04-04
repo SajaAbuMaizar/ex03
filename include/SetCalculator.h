@@ -6,6 +6,8 @@
 #include <iosfwd>
 #include <optional>
 #include <iostream>
+#include <fstream>
+#include "FileException.h"
 
 const int SINGLE_ARG = 1;
 const int BINARY_ARG = 2;
@@ -82,6 +84,7 @@ private:
     void getArguments(std::istream& inp, int& n1, int& n2, int args);
     void checkCommandRange();
     int readNewMax();
+    void openFile(std::ifstream& file);
     void Resize();
     void Read();
 

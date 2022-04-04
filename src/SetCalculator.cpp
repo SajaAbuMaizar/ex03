@@ -72,10 +72,10 @@ void SetCalculator::run()
         {
             m_ostr << e.what();
         }
-       /* catch (InvalidPath e)//if the file is invalid
+        catch (InvalidPath e)//if the file is invalid
         {
             std::cerr << e.what() << "please try again\n";
-        }*/
+        }
 
     } while (m_running);
 }
@@ -204,9 +204,19 @@ void SetCalculator::runAction(Action action)
 
 void SetCalculator::Read()
 {
+    std::ifstream file;
+    openFile(file);
+
+
+}
+
+void SetCalculator::openFile(std::ifstream& file)
+{
     std::string fileName;
     m_istr >> fileName;
-
+    file.open(fileName);
+    if (!file.is_open())
+        throw InvalidPath();
 }
 
 void SetCalculator::Resize()
