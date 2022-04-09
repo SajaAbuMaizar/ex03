@@ -17,7 +17,8 @@
 namespace rng = std::ranges;
 
 
-
+//the c-tor of the SetCalculator class
+//it sets all the initial values and asks the user what they want the max command number to be
 SetCalculator::SetCalculator(std::istream& istr, std::ostream& ostr)
     : m_actions(createActions()), m_operations(createOperations()), m_istr(istr), m_ostr(ostr),
       m_readMode(false), m_continueReading(true)
@@ -25,6 +26,8 @@ SetCalculator::SetCalculator(std::istream& istr, std::ostream& ostr)
     checkCommandRange();
 }
 
+//this function asks the user to enter the max command number he wants
+//then it checks to validate that the number is in the range
 void SetCalculator::checkCommandRange()
 {
     m_ostr << "Please enter the maximum number of functions:\n";
@@ -45,6 +48,7 @@ void SetCalculator::getArguments(std::istream& input, int& arg1, int& arg2, int 
         ss >> arg1 >> arg2;
 }
 
+//this function runs the program
 void SetCalculator::run()
 {
     do
@@ -56,13 +60,14 @@ void SetCalculator::run()
     } while (m_running);
 }
 
+//this function takes in the command that the user wants and runs it
 void SetCalculator::runCommands(std::istream& input)
 {
     try
     {
-        initialPrint();
+        initialPrint(); //print the information about the program
         const auto action = readAction(input);
-        runAction(action, input);
+        runAction(action, input); //run the command that the user wants to perform
         return;
     }
     catch (std::invalid_argument e)
@@ -81,16 +86,17 @@ void SetCalculator::runCommands(std::istream& input)
     {
         std::cerr << e.what() << "please try again\n";
     }
-    if (m_readMode)
+    if (m_readMode) //if there's something wrong with the commands in the file
         throw FileError();
 }
 
+//this function prints the information about the program
 void SetCalculator::initialPrint() const
 {
     m_ostr << '\n';
     m_ostr << "Maximum number of commands: " << m_maxCommands << '\n';
     m_ostr << "Number of available commands: " << m_maxCommands - m_operations.size() << '\n';
-    printOperations();
+    printOperations(); //prints the list of available commands
     m_ostr << "Enter command ('help' for the list of available commands): ";
 }
 
@@ -136,6 +142,7 @@ void SetCalculator::exit()
     m_running = false;
 }
 
+//this function prints out the list of available commands
 void SetCalculator::printOperations() const
 {
     m_ostr << "List of available set operations:\n";
@@ -149,6 +156,7 @@ void SetCalculator::printOperations() const
     m_ostr << '\n';
 }
 
+//this function reads the operation index the user wants to perform
 std::optional<int> SetCalculator::readOperationIndex(std::istream& input)
 {
     int i = 0;
@@ -172,11 +180,12 @@ std::optional<int> SetCalculator::readOperationIndex(std::istream& input)
         m_ostr << "Operation #" << i << " doesn't exist\n";
         return {};
     }
-    if (m_readMode)
+    if (m_readMode) //an error in the file
         throw FileError();
     return i;
 }
 
+//this function reads the action that will pe performed from the user
 SetCalculator::Action SetCalculator::readAction(std::istream& input) const
 {
     auto action = std::string();
@@ -217,12 +226,13 @@ void SetCalculator::runAction(Action action, std::istream& input)
     }
 }
 
+//this function reads the path of a file and executes the commands in it
 void SetCalculator::Read()
 {
     std::ifstream file;
     openFile(file);
-    m_continueReading = true;
-    m_readMode = true;
+    m_continueReading = true;//to know if the user wants to continue reading the file
+    m_readMode = true;//to know that we're in the mode of reading a file
     m_numOfLine = 0;
 
     while (!file.eof() && m_continueReading)
@@ -232,15 +242,17 @@ void SetCalculator::Read()
             m_numOfLine++;
             runCommands(file);
         }
-        catch (FileError e)
+        catch (FileError e)//if an error in the file occures
         {
             m_ostr << e.what() << m_numOfLine;
             checkToContinue();
         }
     }
-    m_readMode = false;
+    m_readMode = false;//reading the file is done
 }
 
+//this function checks if the user wants to continue reading the file
+//after finding an error in the file
 void SetCalculator::checkToContinue()
 {
     int answer;
@@ -251,6 +263,7 @@ void SetCalculator::checkToContinue()
         m_continueReading = false;
 }
 
+//this function takes in the path of the file from the user and opens it
 void SetCalculator::openFile(std::ifstream& file)
 {
     std::string fileName;
@@ -260,6 +273,7 @@ void SetCalculator::openFile(std::ifstream& file)
         throw InvalidPath();
 }
 
+//this function resizes the max number of commands that the user can enter
 void SetCalculator::Resize(std::istream& input)
 {
     int temp = readNewMax(input);
@@ -270,13 +284,14 @@ void SetCalculator::Resize(std::istream& input)
         m_ostr << "Do you want to cancel the command or to delete the extra commands?\n"
             << "0 = cancel ,1 = delete extra commands\n";
         input >> answer;
-        if (answer)
+        if (answer)//if the user chooses to erase the extra commands
             m_operations.erase(m_operations.begin() + temp, m_operations.end());
     }
     else
         m_maxCommands = temp;
 }
 
+//this function takes in the new max number of commands from the user
 int SetCalculator::readNewMax(std::istream& input)
 {
     int temp;
@@ -287,7 +302,7 @@ int SetCalculator::readNewMax(std::istream& input)
             input >> temp;
             if (bool failed = input.fail())
                 throw std::istream::failure("");
-            if (temp < MIN_COMMANDS || temp > MAX_COMMANDS)
+            if (temp < MIN_COMMANDS || temp > MAX_COMMANDS)//check in range
                 throw std::invalid_argument("received incorrect value\n");
             return temp;
         }
