@@ -27,7 +27,7 @@ SetCalculator::SetCalculator(std::istream& istr, std::ostream& ostr)
 
 void SetCalculator::checkCommandRange()
 {
-    m_ostr << "Please enter maximum number of functions:\n";
+    m_ostr << "Please enter the maximum number of functions:\n";
     m_maxCommands = readNewMax(m_istr);
 }
 
@@ -88,7 +88,7 @@ void SetCalculator::runCommands(std::istream& input)
 void SetCalculator::initialPrint() const
 {
     m_ostr << '\n';
-    m_ostr << "Number of maximum commands: " << m_maxCommands << '\n';
+    m_ostr << "Maximum number of commands: " << m_maxCommands << '\n';
     m_ostr << "Number of available commands: " << m_maxCommands - m_operations.size() << '\n';
     printOperations();
     m_ostr << "Enter command ('help' for the list of available commands): ";
@@ -204,16 +204,16 @@ void SetCalculator::runAction(Action action, std::istream& input)
             break;
 
         case Action::Eval:         eval(input);                     break;
-        case Action::Union:        binaryFunc<Union>(input);   break;
+        case Action::Union:        binaryFunc<Union>(input);        break;
         case Action::Intersection: binaryFunc<Intersection>(input); break;
         case Action::Difference:   binaryFunc<Difference>(input);   break;
         case Action::Product:      binaryFunc<Product>(input);      break;
         case Action::Comp:         binaryFunc<Comp>(input);         break;
         case Action::Del:          del(input);                      break;
         case Action::Resize:       Resize(input);                   break;
-        case Action::Read:         Read();                     break;
-        case Action::Help:         help();                     break;
-        case Action::Exit:         exit();                     break;
+        case Action::Read:         Read();                          break;
+        case Action::Help:         help();                          break;
+        case Action::Exit:         exit();                          break;
     }
 }
 
@@ -267,7 +267,7 @@ void SetCalculator::Resize(std::istream& input)
     if (temp < m_operations.size()) //if the new max is less than the existed commands
     {
         int answer;
-        m_ostr << "Do you want to cancel the command or delete the extra commands?\n"
+        m_ostr << "Do you want to cancel the command or to delete the extra commands?\n"
             << "0 = cancel ,1 = delete extra commands\n";
         input >> answer;
         if (answer)
