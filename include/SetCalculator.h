@@ -74,7 +74,6 @@ private:
     int m_numOfLine;
     bool m_readMode;
     bool m_continueReading;
-    std::string m_line;
     std::istream& m_istr;
     std::ostream& m_ostr;
 
@@ -85,7 +84,6 @@ private:
     static ActionMap createActions();
     static OperationList createOperations();
 
-    void getArguments(std::istream& inp, int& n1, int& n2, int args);
     void runCommands(std::istream& input);
     void checkToContinue();
     void initialPrint() const;

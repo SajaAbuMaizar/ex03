@@ -33,20 +33,6 @@ void SetCalculator::checkCommandRange()
     m_maxCommands = readNewMax(m_istr);
 }
 
-//asks to anter arguments
-void SetCalculator::getArguments(std::istream& input, int& arg1, int& arg2, int num_of_args)
-{
-    std::string line;
-    std::getline(input, line);
-    std::stringstream ss(line);
-    ss.exceptions(ss.failbit | ss.badbit);
-
-    if (num_of_args == SINGLE_ARG)
-        ss >> arg1;
-    else
-        ss >> arg1 >> arg2;
-}
-
 //this function runs the program
 void SetCalculator::run()
 {
@@ -241,8 +227,7 @@ void SetCalculator::Read()
         catch (FileError e)//if an error in the file occures
         {
             std::string temp;
-            std::getline(file, temp);
-            m_ostr << std::endl << temp << '\n';
+            std::getline(file, temp); //to get to the next line
             m_ostr << e.what() << m_numOfLine++;
             checkToContinue();
         }
