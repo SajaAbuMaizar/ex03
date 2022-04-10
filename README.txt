@@ -71,3 +71,8 @@ Classes:
  ● When the program reads an action that needs N arguments from the terminal, in case of extra arguments
    the program reads the first N arguments, executes the action (or throw an exeption) and finally clears
    the buffer from the extra arguments.
+
+
+
+
+   https://stackoverflow.com/questions/4813129/how-to-get-the-line-number-from-a-file-in-c

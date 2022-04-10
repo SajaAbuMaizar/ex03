@@ -16,7 +16,6 @@
 
 namespace rng = std::ranges;
 
-
 //the c-tor of the SetCalculator class
 //it sets all the initial values and asks the user what they want the max command number to be
 SetCalculator::SetCalculator(std::istream& istr, std::ostream& ostr)
@@ -164,25 +163,22 @@ std::optional<int> SetCalculator::readOperationIndex(std::istream& input)
     {
         input >> i;
         if (bool failed = input.fail())
-        {
             throw std::istream::failure("");
-        }
         if (i >= m_operations.size())
             throw (std::out_of_range(""));
+        return i;
     }
     catch (std::istream::failure e)
     {
-        m_ostr << "Bad Operation Input\n";
-        return {};
+        m_ostr << "\nBad Operation Input\n";
     }
     catch (std::out_of_range e)
     {
-        m_ostr << "Operation #" << i << " doesn't exist\n";
-        return {};
+        m_ostr << "\nOperation #" << i << " doesn't exist\n";
     }
     if (m_readMode) //an error in the file
         throw FileError();
-    return i;
+    return {};
 }
 
 //this function reads the action that will pe performed from the user
@@ -196,7 +192,7 @@ SetCalculator::Action SetCalculator::readAction(std::istream& input) const
 		return i->action;
 	}
 	else
-		throw std::invalid_argument("received incorrect value\n");
+		throw std::invalid_argument("\nreceived incorrect value\n");
     return Action::Invalid;
 }
 
@@ -239,12 +235,15 @@ void SetCalculator::Read()
     {
         try
         {
-            m_numOfLine++;
             runCommands(file);
+            m_numOfLine++;
         }
         catch (FileError e)//if an error in the file occures
         {
-            m_ostr << e.what() << m_numOfLine;
+            std::string temp;
+            std::getline(file, temp);
+            m_ostr << std::endl << temp << '\n';
+            m_ostr << e.what() << m_numOfLine++;
             checkToContinue();
         }
     }
@@ -308,14 +307,16 @@ int SetCalculator::readNewMax(std::istream& input)
         }
         catch (std::istream::failure e)
         {
-            m_ostr << "Bad input\n";
+            m_ostr << "\nBad input\n";
             m_istr.clear(); //to clear the buffer
             m_istr.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         }
         catch (std::invalid_argument e)
         {
-            m_ostr << "Argument must be in the range 3 - 100\n";
+            m_ostr << "\nArgument must be in the range 3 - 100\n";
         }
+        if (m_readMode)//the error is in the file
+            throw FileError();
         m_ostr << "Enter new max command number:\n";
     }
 }

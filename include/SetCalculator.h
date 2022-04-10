@@ -31,7 +31,7 @@ private:
     template <typename FuncType>
     void binaryFunc(std::istream& input)
     {
-        if (m_operations.size() == m_maxCommands)
+        if (m_operations.size() == m_maxCommands) //if the user proceeded the max number of commands
             throw std::out_of_range("Reached the maximum number of operations\n");
         if (auto f0 = readOperationIndex(input), f1 = readOperationIndex(input); f0 && f1)
         {

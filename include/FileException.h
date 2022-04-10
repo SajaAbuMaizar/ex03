@@ -1,4 +1,6 @@
 #pragma once
+#include <string>
+#include <fstream>
 
 class InvalidPath :public std::exception
 {
@@ -13,10 +15,9 @@ public:
 class FileError :public std::exception
 {
 public:
-	FileError() {};
+    FileError() {};
 	~FileError() {};
 	const char* what() const noexcept {
 		return "\nError at line: ";
 	}
 };
-
