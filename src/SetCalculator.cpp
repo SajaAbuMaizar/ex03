@@ -178,7 +178,7 @@ SetCalculator::Action SetCalculator::readAction(std::istream& input) const
 		return i->action;
 	}
 	else
-		throw std::invalid_argument("\nreceived incorrect value\n");
+		throw std::invalid_argument("\nReceived incorrect value\n");
     return Action::Invalid;
 }
 
@@ -216,6 +216,7 @@ void SetCalculator::Read()
     m_continueReading = true;//to know if the user wants to continue reading the file
     m_readMode = true;//to know that we're in the mode of reading a file
     m_numOfLine = 0;
+    std::string temp;
 
     while (!file.eof() && m_continueReading)
     {
@@ -226,9 +227,8 @@ void SetCalculator::Read()
         }
         catch (FileError e)//if an error in the file occures
         {
-            std::string temp;
-            std::getline(file, temp); //to get to the next line
-            m_ostr << e.what() << m_numOfLine++;
+            std::getline(file, temp); //to get to the next lines
+            m_ostr << e.what() << m_numOfLine;
             checkToContinue();
         }
     }
@@ -287,7 +287,7 @@ int SetCalculator::readNewMax(std::istream& input)
             if (bool failed = input.fail())
                 throw std::istream::failure("");
             if (temp < MIN_COMMANDS || temp > MAX_COMMANDS)//check in range
-                throw std::invalid_argument("received incorrect value\n");
+                throw std::invalid_argument("\nreceived incorrect value\n");
             return temp;
         }
         catch (std::istream::failure e)

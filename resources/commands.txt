@@ -1,4 +1,0 @@
-uni 0 0 abc
-inter 9 1
-resize 10
-eval 0 3 2 1 5 2 1 6

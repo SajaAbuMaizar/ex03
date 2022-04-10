@@ -62,17 +62,15 @@ Classes:
 ---------------------------------------------------------------------------------------------------------
 ------------------------------------------- Additional Notes --------------------------------------------
 ---------------------------------------------------------------------------------------------------------
- ● The command "Read" reads actions from a text file, the user writes the name of the file that contains
+ ● The command "read" reads actions from a text file, the user writes the name of the file that contains
    the actions without the extention (.txt). For example, to read command from the file: "Commands.txt",
    the user writes "Read Commands" in the terminal.
- ● The command "Read" can only be executed from the terminal, it isn't support in files, meaning a file 
-   can't contain the command "Read".
- ● -------- what happens when a file reads more/less arguments ------------------!!!!!
+ ● The command "read" can only be executed from the terminal, it isn't support in files, meaning a file 
+   can't contain the command "read".
+ ● When reading from the keyboard, the program proceeds to read arguments until reaching the appropriate
+   number of arguments for the command (it doesn't read line by line).
+   When reading input from a file, the program reads line by line, it excutes the correct commands,
+   and when reading extra arguments, the program throws an exception and continues to the following line.
  ● When the program reads an action that needs N arguments from the terminal, in case of extra arguments
    the program reads the first N arguments, executes the action (or throw an exeption) and finally clears
    the buffer from the extra arguments.
-
-
-
-
-   https://stackoverflow.com/questions/4813129/how-to-get-the-line-number-from-a-file-in-c
